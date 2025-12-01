@@ -3,8 +3,10 @@ package de.aoc.y2025;
 public class Day01 {
     public static int partOne(String input) {
         var lines = input.lines().map(String::trim).toList();
+
         int dial = 50;
-        int zero = 0;
+        int zeroes = 0;
+
         for (String line : lines) {
             var direction = line.substring(0, 1);
             var distance = Integer.parseInt(line.substring(1));
@@ -12,51 +14,44 @@ public class Day01 {
             if (direction.equals("L")) {
                 distance = -distance;
             }
-            dial = dial + distance;
-            dial = dial % 100;
-//            if (dial > 99) {
-//                dial = dial - 100;
-//            } else if (dial < 0 ) {
-//                dial = dial + 100;
-//            }
+            dial = (dial + distance) % 100;
 
-            if (dial == 0) {
-                zero++;
+            if (dial < 0) {
+                dial = 100 + dial;
             }
-
-//            System.out.println(dial);
-
+            if (dial == 0) {
+                zeroes++;
+            }
         }
-        return zero;
+        return zeroes;
     }
 
     public static int partTwo(String input) {
         var lines = input.lines().map(String::trim).toList();
+
         int dial = 50;
-        int zero = 0;
+        int zeroes = 0;
+
         for (String line : lines) {
             var direction = line.substring(0, 1);
             var distance = Integer.parseInt(line.substring(1));
 
-//            if (direction.d
-            var z = 0;
-
             for (int i = 0; i < distance; i++) {
-                if (direction.equals("L")) {
+                if (direction.equals("L")) { // Move dial to left
                     dial--;
                     if (dial == 0 && i + 1 == distance) {
-                        zero++;
+                        zeroes++;
                     }
                     if (dial < 0) {
                         if (i > 0) {
-                            zero++;
+                            zeroes++;
                         }
                         dial = 99;
                     }
-                } else if (direction.equals("R")) {
+                } else if (direction.equals("R")) { //Move dial to right
                     dial++;
                     if (dial == 100) {
-                        zero++;
+                        zeroes++;
                         dial = 0;
                     }
                 }
@@ -65,6 +60,6 @@ public class Day01 {
 //            zero += z;
 
         }
-        return zero;
+        return zeroes;
     }
 }
