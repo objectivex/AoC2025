@@ -2,6 +2,7 @@ package de.aoc.y2025;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Day02 {
@@ -9,10 +10,7 @@ public class Day02 {
     }
 
     public static long partOne(String input) {
-        var ranges = Arrays.stream(input.split(","))
-                .map(String::trim)
-                .map(l -> new Range(Long.parseLong(l.split("-")[0]), Long.parseLong(l.split("-")[1])))
-                .toList();
+        var ranges = getRanges(input);
 
         long checksum = 0;
 
@@ -34,10 +32,7 @@ public class Day02 {
     }
 
     public static long partTwo(String input) {
-        var ranges = Arrays.stream(input.split(","))
-                .map(String::trim)
-                .map(l -> new Range(Long.parseLong(l.split("-")[0]), Long.parseLong(l.split("-")[1])))
-                .toList();
+        var ranges = getRanges(input);
 
         Set<Long> invalidIds = new HashSet<>();
 
@@ -50,25 +45,21 @@ public class Day02 {
                     if (right.length() % left.length() != 0) {
                         continue;
                     }
-                    var repeat = right.length() / left.length();
-                    String shouldBe = "";
-                    for (int i1 = 0; i1 < repeat; i1++) {
-                        shouldBe += left;
-                    }
 
-                    if (right.equals(shouldBe)){
-                        System.out.println(i);
+                    var repeat = right.length() / left.length();
+                    if (right.equals(left.repeat(repeat))){
                         invalidIds.add(i);
                     }
                 }
-
-//                String left = id.substring(0, id.length() / 2);
-//                String right = id.substring(id.length() / 2);
-//                if (left.equals(right)) {
-//                    checksum += i;
-//                }
             }
         }
         return invalidIds.stream().reduce(0L, Long::sum);
+    }
+
+    private static List<Range> getRanges(String input) {
+        return Arrays.stream(input.split(","))
+                .map(String::trim)
+                .map(l -> new Range(Long.parseLong(l.split("-")[0]), Long.parseLong(l.split("-")[1])))
+                .toList();
     }
 }
