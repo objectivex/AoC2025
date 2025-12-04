@@ -15,7 +15,7 @@ public class Day04 {
         }
 
 
-        var checkedGrid = new char[lines.length][lines[0].length()];
+//        var checkedGrid = new char[lines.length][lines[0].length()];
 
         for (int y = 0; y < grid.length; y++) {
             var line = grid[y];
@@ -23,22 +23,22 @@ public class Day04 {
                 if (grid[y][x] == '@') {
                     var isok = check(grid, x, y);
                     if (isok) {
-                        checkedGrid[y][x] = 'x';
+                        grid[y][x] = 'x';
                     } else {
-                        checkedGrid[y][x] = grid[y][x];
+                        grid[y][x] = grid[y][x];
                     }
                 } else {
-                    checkedGrid[y][x] = grid[y][x];
+                    grid[y][x] = grid[y][x];
                 }
             }
         }
 
 
         int cnt = 0;
-        for (int y = 0; y < checkedGrid.length; y++) {
-            var line = checkedGrid[y];
+        for (int y = 0; y < grid.length; y++) {
+            var line = grid[y];
             for (int x = 0; x < line.length; x++) {
-                if (checkedGrid[y][x] == 'x') {
+                if (grid[y][x] == 'x') {
                     cnt++;
                 }
             }
@@ -50,30 +50,30 @@ public class Day04 {
 
     private static boolean check(char[][] grid, int xPos, int yPos) {
         int cnt = 0;
-        if (getElement(grid, xPos - 1, yPos - 1) == '@') {
+        if (getElement(grid, xPos - 1, yPos - 1) == '@' || getElement(grid, xPos - 1, yPos - 1) == 'x') {
             cnt++;
         }
-        if (getElement(grid, xPos, yPos - 1) == '@') {
+        if (getElement(grid, xPos, yPos - 1) == '@' || getElement(grid, xPos, yPos - 1) == 'x') {
             cnt++;
         }
-        if (getElement(grid, xPos + 1, yPos - 1) == '@') {
-            cnt++;
-        }
-
-        if (getElement(grid, xPos - 1, yPos) == '@') {
-            cnt++;
-        }
-        if (getElement(grid, xPos + 1, yPos) == '@') {
+        if (getElement(grid, xPos + 1, yPos - 1) == '@' || getElement(grid, xPos + 1, yPos - 1) == 'x') {
             cnt++;
         }
 
-        if (getElement(grid, xPos - 1, yPos + 1) == '@') {
+        if (getElement(grid, xPos - 1, yPos) == '@' || getElement(grid, xPos - 1, yPos) == 'x') {
             cnt++;
         }
-        if (getElement(grid, xPos, yPos + 1) == '@') {
+        if (getElement(grid, xPos + 1, yPos) == '@' || getElement(grid, xPos + 1, yPos) == 'x') {
             cnt++;
         }
-        if (getElement(grid, xPos + 1, yPos + 1) == '@') {
+
+        if (getElement(grid, xPos - 1, yPos + 1) == '@' || getElement(grid, xPos - 1, yPos + 1) == 'x') {
+            cnt++;
+        }
+        if (getElement(grid, xPos, yPos + 1) == '@' || getElement(grid, xPos, yPos + 1) == 'x') {
+            cnt++;
+        }
+        if (getElement(grid, xPos + 1, yPos + 1) == '@' || getElement(grid, xPos + 1, yPos + 1) == 'x') {
             cnt++;
         }
 
@@ -103,7 +103,55 @@ public class Day04 {
     }
 
     public static long partTwo(String input) {
-        return -1;
+        var lines = input.split("\n");
+
+        var grid = new char[lines.length][lines[0].length()];
+
+        for (int y = 0; y < lines.length; y++) {
+            var line = lines[y];
+            for (int x = 0; x < line.length(); x++) {
+                grid[y][x] = line.charAt(x);
+            }
+        }
+
+
+        var cnt = 0;
+        while(true) {
+            for (int y = 0; y < grid.length; y++) {
+                var line = grid[y];
+                for (int x = 0; x < line.length; x++) {
+                    if (grid[y][x] == '@') {
+                        var isok = check(grid, x, y);
+                        if (isok) {
+                            grid[y][x] = 'x';
+                        } else {
+                            grid[y][x] = grid[y][x];
+                        }
+                    } else {
+                        grid[y][x] = grid[y][x];
+                    }
+                }
+            }
+
+
+            int currentCnt = 0;
+            for (int y = 0; y < grid.length; y++) {
+                var line = grid[y];
+                for (int x = 0; x < line.length; x++) {
+                    if (grid[y][x] == 'x') {
+                        grid[y][x] = '.';
+                        currentCnt++;
+                    }
+                }
+            }
+
+            if (currentCnt == 0) {
+                break;
+            }
+
+            cnt += currentCnt;
+        }
+        return cnt;
     }
 
 }

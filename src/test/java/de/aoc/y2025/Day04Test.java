@@ -26,7 +26,7 @@ public class Day04Test extends AoCTest {
 
     @Test
     public void testPartTwo() {
-//        assertEquals(43, Day04.partTwo(input));
-//        assertEquals(173300819005913L, Day04.partTwo(readInput()));
+        assertEquals(43, Day04.partTwo(input));
+        assertEquals(9000, Day04.partTwo(readInput()));
     }
 }
