@@ -39,13 +39,6 @@ public class Day05Test extends AoCTest {
                 5-20
                 2-22
                 """));
-//        assertEquals(21, Day05.partTwo("""
-//                100-200
-//                20-50
-//                110-210
-//                10-22
-//
-//                """));
-        assertEquals(9000, Day05.partTwo(readInput()));
+        assertEquals(336173027056994L, Day05.partTwo(readInput()));
     }
 }
