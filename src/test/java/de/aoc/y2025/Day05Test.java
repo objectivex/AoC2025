@@ -28,6 +28,24 @@ public class Day05Test extends AoCTest {
     @Test
     public void testPartTwo() {
         assertEquals(14, Day05.partTwo(input));
+        assertEquals(20, Day05.partTwo("""
+                10-14
+                16-18
+                1-20"""));
+        assertEquals(21, Day05.partTwo("""
+                10-14
+                16-18
+                12-15
+                5-20
+                2-22
+                """));
+//        assertEquals(21, Day05.partTwo("""
+//                100-200
+//                20-50
+//                110-210
+//                10-22
+//
+//                """));
         assertEquals(9000, Day05.partTwo(readInput()));
     }
 }
