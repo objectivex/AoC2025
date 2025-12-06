@@ -6,22 +6,22 @@ import java.util.List;
 
 public class Day06 {
     public static long partOne(String input) {
-        var inputs =
-                input.lines().map(l -> Arrays.asList(l.trim().split("\\s+"))).toList();
+        var inputs = input.lines()
+                .map(l -> Arrays.asList(l.trim().split("\\s+")))
+                .toList();
 
         long sum = 0;
-        var x = inputs.getFirst().size();
+        var inputSize = inputs.getFirst().size();
 
-        for (int i = 0; i < x; i++) {
-            String apply = inputs.getLast().get(i);
+        for (int listIndex = 0; listIndex < inputSize; listIndex++) {
+            String operator = inputs.getLast().get(listIndex);
 
-            long internalSum = Long.parseLong(inputs.get(0).get(i));
-            for (int i1 = 1; i1 < inputs.size() - 1; i1++) {
-                if (apply.equals("+")) {
-                    internalSum += Long.parseLong(inputs.get(i1).get(i));
-                } else if (apply.equals("*")) {
-                    internalSum *= Long.parseLong(inputs.get(i1).get(i));
-                    ;
+            long internalSum = Long.parseLong(inputs.getFirst().get(listIndex));
+            for (int rowIndex = 1; rowIndex < inputs.size() - 1; rowIndex++) {
+                if (operator.equals("+")) {
+                    internalSum += Long.parseLong(inputs.get(rowIndex).get(listIndex));
+                } else if (operator.equals("*")) {
+                    internalSum *= Long.parseLong(inputs.get(rowIndex).get(listIndex));
                 }
 
             }
@@ -32,7 +32,7 @@ public class Day06 {
 
     public static long partTwo(String input) {
         var lines = input.split("\n");
-        var maxLength = Arrays.stream(lines).mapToInt(l -> l.length()).max().orElseThrow();
+        var maxLength = Arrays.stream(lines).mapToInt(String::length).max().orElseThrow();
 
         char[][] grid = new char[lines.length][maxLength];
         for (int y = 0; y < lines.length; y++) {
@@ -42,51 +42,34 @@ public class Day06 {
             }
         }
 
-        print(grid);
-
         List<Long> numbers = new ArrayList<>();
-        char operand = ' ';
         long sum = 0;
 
         for (int x = grid[0].length - 1; x >= 0; x--) {
-            String number = "";
+            long number = 0;
             for (int y = 0; y < grid.length - 1; y++) {
                 if (Character.isDigit(grid[y][x])) {
-                    number += grid[y][x];
+                    number = 10 * number + Long.parseLong("" + grid[y][x]);
                 }
             }
 
-            if (!number.isBlank()) {
-                numbers.add(Long.parseLong(number));
-            }
-            var o = grid[grid.length - 1][x];
-            if (o == '+') {
-                System.out.println("+");
-                System.out.println(numbers);
-                var s = numbers.stream().reduce(0L, Long::sum);
-                sum += s;
-                numbers.clear();
-            } else if (o == '*') {
-                System.out.println("*");
-                System.out.println(numbers);
-                var s = numbers.stream().reduce(1L, (aLong, aLong2) -> aLong * aLong2);
-                sum += s;
-                numbers.clear();
+            if (number != 0) {
+                numbers.add(number);
             }
 
-//            System.out.println(o);
+            var operator = grid[grid.length - 1][x];
+            if (operator == '+') {
+                var localSum = numbers.stream().reduce(0L, Long::sum);
+                sum += localSum;
+                numbers.clear();
+            } else if (operator == '*') {
+                var localSum = numbers.stream().reduce(1L, (l1, l2) -> l1 * l2);
+                sum += localSum;
+                numbers.clear();
+            }
         }
 
         return sum;
-    }
-
-    private static void print(char[][] grid) {
-        for (char[] chars : grid) {
-            for (char aChar : chars) {
-                System.out.print(aChar);
-            }
-            System.out.println();
-        }
     }
 
 }
