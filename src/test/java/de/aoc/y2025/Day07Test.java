@@ -32,7 +32,7 @@ public class Day07Test extends AoCTest {
 
     @Test
     public void testPartTwo() {
-        assertEquals(3263827, Day07.partTwo(input));
+        assertEquals(40, Day07.partTwo(input));
         assertEquals(13215665360076L, Day07.partTwo(readInput()));
     }
 }
