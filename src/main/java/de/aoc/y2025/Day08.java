@@ -3,129 +3,49 @@ package de.aoc.y2025;
 import java.util.*;
 
 public class Day08 {
-    record Position(int x, int y, int z) {
+    record Position(long x, long y, long z) {
     }
 
     record Distance(Position p1, Position p2, Double distance) {
     }
 
     public static long partOne(String input, int maxPairs) {
-        Map<Position, Integer> circuitMapping = new HashMap<>();
-        var positions = input.lines()
-                .map(l -> {
-                    var p = l.split(",");
-                    return new Position(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
-                })
-                .toList();
+        var positions = getPositions(input);
 
-        List<Distance> distances = new ArrayList<>();
-        for (int i = 0; i < positions.size(); i++) {
-            for (int j = i + 1; j < positions.size(); j++) {
-                Position p1 = positions.get(i);
-                Position p2 = positions.get(j);
-                distances.add(new Distance(p1, p2, calculateDistance(p1, p2)));
-            }
-        }
+        Map<Position, Integer> circuitMapping = createCircuitMapping(positions);
+        List<Distance> distances = calculateDistances(positions).subList(0, maxPairs);
 
-        distances.sort(Comparator.comparingDouble(Distance::distance));
-        int currentCircuit = 0;
-
-        distances = distances.subList(0, maxPairs);
         for (Distance distance : distances) {
-            var circuit1 = circuitMapping.get(distance.p1);
-            var circuit2 = circuitMapping.get(distance.p2);
-
-            int circuit = 0;
-            if (circuit1 != null && circuit2 != null) {
-                List<Position> toConnect = circuitMapping.entrySet().stream().filter(e -> e.getValue().compareTo(circuit2) == 0).map(e -> e.getKey()).toList();
-                for (Position position : toConnect) {
-                    circuitMapping.put(position, circuit1);
-                }
-            } else if (circuit1 == null && circuit2 != null) {
-                circuitMapping.put(distance.p1, circuit2);
-            } else if (circuit1 != null && circuit2 == null) {
-                circuitMapping.put(distance.p2, circuit1);
-            } else if (circuit1 == null && circuit2 == null) {
-                currentCircuit++;
-                circuit = currentCircuit;
-                circuitMapping.put(distance.p1, circuit);
-                circuitMapping.put(distance.p2, circuit);
-            }
-
+            connectCircuits(circuitMapping, distance);
         }
 
         Map<Integer, Integer> frequencies = new HashMap<>();
 
-        circuitMapping.values().stream()
+        circuitMapping.values()
+                .stream()
                 .distinct()
                 .forEach(v -> frequencies.put(v, Collections.frequency(circuitMapping.values(), v)));
 
-        System.out.println(frequencies);
 
         var topMost = frequencies.values()
                 .stream()
                 .sorted(Comparator.comparingInt(i -> (int) i).reversed())
                 .toList();
 
-        long sum = topMost.get(0);
+        long sum = topMost.getFirst();
         for (int i = 1; i < 3; i++) {
             sum *= topMost.get(i);
-
         }
         return sum;
     }
 
-    private static Double calculateDistance(Position position, Position position1) {
-        return Math.sqrt(Math.pow((position.x - position1.x), 2) + Math.pow((position.y - position1.y), 2) + Math.pow((position.z - position1.z), 2));
-    }
-
     public static long partTwo(String input) {
-        Map<Position, Integer> circuitMapping = new HashMap<>();
-        var positions = input.lines()
-                .map(l -> {
-                    var p = l.split(",");
-                    return new Position(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
-                })
-                .toList();
-
-        int currentCircuit = 1;
-        for (Position position : positions) {
-            circuitMapping.put(position, currentCircuit);
-            currentCircuit++;
-        }
-
-        List<Distance> distances = new ArrayList<>();
-        for (int i = 0; i < positions.size(); i++) {
-            for (int j = i + 1; j < positions.size(); j++) {
-                Position p1 = positions.get(i);
-                Position p2 = positions.get(j);
-                distances.add(new Distance(p1, p2, calculateDistance(p1, p2)));
-            }
-        }
-
-        distances.sort(Comparator.comparingDouble(Distance::distance));
+        var positions = getPositions(input);
+        Map<Position, Integer> circuitMapping = createCircuitMapping(positions);
+        List<Distance> distances = calculateDistances(positions);
 
         for (Distance distance : distances) {
-            var circuit1 = circuitMapping.get(distance.p1);
-            var circuit2 = circuitMapping.get(distance.p2);
-
-            var circuitCountBefore = circuitMapping.values().stream().distinct().count();
-            int circuit = 0;
-            if (circuit1 != null && circuit2 != null) {
-                List<Position> toConnect = circuitMapping.entrySet().stream().filter(e -> e.getValue().compareTo(circuit2) == 0).map(e -> e.getKey()).toList();
-                for (Position position : toConnect) {
-                    circuitMapping.put(position, circuit1);
-                }
-            } else if (circuit1 == null && circuit2 != null) {
-                circuitMapping.put(distance.p1, circuit2);
-            } else if (circuit1 != null && circuit2 == null) {
-                circuitMapping.put(distance.p2, circuit1);
-            } else if (circuit1 == null && circuit2 == null) {
-                currentCircuit++;
-                circuit = currentCircuit;
-                circuitMapping.put(distance.p1, circuit);
-                circuitMapping.put(distance.p2, circuit);
-            }
+            connectCircuits(circuitMapping, distance);
 
             var circuitCountAfter = circuitMapping.values().stream().distinct().count();
             if (circuitCountAfter == 1) {
@@ -137,5 +57,57 @@ public class Day08 {
         }
 
         return -1;
+    }
+
+    private static void connectCircuits(Map<Position, Integer> circuitMapping, Distance distance) {
+        var circuit1 = circuitMapping.get(distance.p1);
+        var circuit2 = circuitMapping.get(distance.p2);
+
+        if (circuit1 != null && circuit2 != null) {
+            if (circuit1.equals(circuit2)) {
+                return;
+            }
+            circuitMapping.entrySet().stream()
+                    .filter(e -> e.getValue().compareTo(circuit2) == 0)
+                    .map(Map.Entry::getKey)
+                    .forEach(position -> circuitMapping.put(position, circuit1));
+        } else if (circuit1 == null && circuit2 != null) {
+            circuitMapping.put(distance.p1, circuit2);
+        } else if (circuit1 != null) {
+            circuitMapping.put(distance.p2, circuit1);
+        }
+    }
+
+    private static List<Distance> calculateDistances(List<Position> positions) {
+        List<Distance> distances = new ArrayList<>();
+        for (int i = 0; i < positions.size(); i++) {
+            for (int j = i + 1; j < positions.size(); j++) {
+                Position p1 = positions.get(i);
+                Position p2 = positions.get(j);
+                Double distance = Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2) + Math.pow((p1.z - p2.z), 2));
+                distances.add(new Distance(p1, p2, distance));
+            }
+        }
+
+        distances.sort(Comparator.comparingDouble(Distance::distance));
+        return distances;
+    }
+
+    private static Map<Position, Integer> createCircuitMapping(List<Position> positions) {
+        Map<Position, Integer> circuitMapping = new HashMap<>();
+        for (int i = 0; i < positions.size(); i++) {
+            var position = positions.get(i);
+            circuitMapping.put(position, i);
+        }
+        return circuitMapping;
+    }
+
+    private static List<Position> getPositions(String input) {
+        return input.lines()
+                .map(l -> {
+                    var p = l.split(",");
+                    return new Position(Long.parseLong(p[0]), Long.parseLong(p[1]), Long.parseLong(p[2]));
+                })
+                .toList();
     }
 }
