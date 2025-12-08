@@ -31,12 +31,12 @@ public class Day08Test extends AoCTest {
     @Test
     public void testPartOne() {
         assertEquals(40, Day08.partOne(input, 10));
-        assertEquals(69192, Day08.partOne(readInput(),1000));
+        assertEquals(69192, Day08.partOne(readInput(), 1000));
     }
 
     @Test
     public void testPartTwo() {
-        assertEquals(40, Day08.partTwo(input));
-//        assertEquals(221371496188107L, Day08.partTwo(readInput()));
+        assertEquals(25272, Day08.partTwo(input));
+        assertEquals(7264308110L, Day08.partTwo(readInput()));
     }
 }
