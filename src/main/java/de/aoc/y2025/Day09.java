@@ -1,5 +1,6 @@
 package de.aoc.y2025;
 
+import java.sql.Array;
 import java.util.*;
 
 public class Day09 {
@@ -35,47 +36,39 @@ public class Day09 {
     }
 
     public static long partTwo(String input) {
-        var positions = readPositions(input);
+        List<Position> positions = new ArrayList<>(readPositions(input));
+        positions.add(positions.getFirst());
+
         var maxX = positions.stream().mapToInt(Position::x).max().orElseThrow();
         var maxY = positions.stream().mapToInt(Position::x).max().orElseThrow();
 
+        Map<Position, Object> border = new HashMap<>();
 
-        Map<Position, Boolean> border = new HashMap();
+        System.out.println("filling");
+        for (int y = 0; y <= maxY; y++) {
+            List<Integer> intersections = new ArrayList<>();
 
-
-        for (Position p1 : positions) {
-            for (Position p2 : positions) {
-                if (p1.x == p2.x) {
-                    for (int y = Math.min(p1.y, p2.y); y <= Math.max(p1.y, p2.y); y++) {
-                        border.put(new Position(p1.x, y), true);
-                        // grid[y][p1.x] = 'X';
-                    }
+            for (int i = 0; i < positions.size() - 1; i++) {
+                Position pos1 = positions.get(i);
+                Position pos2 = positions.get(i + 1);
+                if (pos1.y == pos2.y) {
+                    continue;
                 }
 
-                if (p1.y == p2.y) {
-                    for (int x = Math.min(p1.x, p2.x); x <= Math.max(p1.x, p2.x); x++) {
-                        border.put(new Position(x, p1.y), true);
-//                        grid[p1.y][x] = 'X';
-                    }
+                intersections.addAll(intersect(pos1, pos2, y));
+            }
+
+            Collections.sort(intersections);
+
+            for (int i = 0; i < intersections.size() - 1; i++) {
+                var start = intersections.get(i);
+                var end = intersections.get(i + 1);
+                for (Integer integer = start; integer <= end; integer++) {
+                    border.put(new Position(integer, y), true);
+
                 }
             }
         }
-
-//        var grid = AoCUtils.initGrid(maxY + 1, maxX + 1);
-//        for (Position position : border.keySet()) {
-//            grid[position.y][position.x] = 'X';
-//        }
-//        AoCUtils.print(grid);
-
-        var start = positions.getFirst();
-        start = new Position(start.x+1, start.y+1);
-//        grid[start.y][start.x] = '#';
-        fill(border, start);
-
-//        for (Position position : border.keySet()) {
-//            grid[position.y][position.x] = 'X';
-//        }
-//        AoCUtils.print(grid);
 
         long maxArea = 0;
         for (int i = 0; i < positions.size(); i++) {
@@ -86,14 +79,60 @@ public class Day09 {
                 var length = Math.max(pos1.x, pos2.x) - Math.min(pos1.x, pos2.x) + 1;
                 var height = Math.max(pos1.y, pos2.y) - Math.min(pos1.y, pos2.y) + 1;
                 var area = (long) length * (long) height;
-
-                if (contained(pos1, pos2, border, maxX, maxY)) {
-                    maxArea = Math.max(maxArea, area);
+                if (area > maxArea) {
+                    if (isIncluded(pos1, pos2, border)) {
+                        maxArea = area;
+                    }
                 }
             }
         }
         return maxArea;
+
+//        var grid = AoCUtils.initGrid(maxY + 1, maxX + 1);
+//        for (Position position : border.keySet()) {
+//            grid[position.y][position.x] = 'X';
+//        }
+//        AoCUtils.print(grid);
+
+
 //        return -1;
+    }
+
+    private static boolean isIncluded(Position pos1, Position pos2, Map<Position, Object> border) {
+        var minX = Math.min(pos1.x, pos2.x);
+        var minY = Math.min(pos1.y, pos2.y);
+        var maxX = Math.max(pos1.x, pos2.x);
+        var maxY = Math.max(pos1.y, pos2.y);
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                if (!border.containsKey(new Position(x, y))) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+
+    private static List<Integer> intersect(Position pos1, Position pos2, int y) {
+        List<Integer> integers = new ArrayList<>();
+
+        int minY = Math.min(pos1.y, pos2.y);
+        int maxY = Math.max(pos1.y, pos2.y);
+
+
+        if (y < minY) {
+            return integers;
+        } else if (y == maxY) {
+            return List.of(pos1.x, pos1.x);
+        } else if (y == minY) {
+            return List.of(pos1.x);
+        } else if (y > minY && y < maxY) {
+            return List.of(pos1.x);
+        }
+
+        return Collections.emptyList();
     }
 
     private static void fill(Map<Position, Boolean> border, Position start) {
@@ -102,10 +141,10 @@ public class Day09 {
         }
 
         border.put(start, true);
-        fill(border,new Position(start.x-1, start.y));
-        fill(border,new Position(start.x+1, start.y));
-        fill(border,new Position(start.x, start.y-1));
-        fill(border,new Position(start.x, start.y+1));
+        fill(border, new Position(start.x - 1, start.y));
+        fill(border, new Position(start.x + 1, start.y));
+        fill(border, new Position(start.x, start.y - 1));
+        fill(border, new Position(start.x, start.y + 1));
     }
 
     private static boolean contained(Position pos1, Position pos2, Map<Position, Boolean> positions, int maxX, int maxY) {
