@@ -110,4 +110,53 @@ public class Day08 {
                 })
                 .toList();
     }
+
+    public static class Day09 {
+        record Position(long x, long y) {
+        }
+
+        public static long partOne(String input) {
+            var positions = readPositions(input);
+
+            long maxArea = 0;
+            for (int i = 0; i < positions.size(); i++) {
+                var pos1 = positions.get(i);
+                for (int j = i + 1; j < positions.size(); j++) {
+                    var pos2 = positions.get(j);
+
+                    var length = Math.max(pos1.x, pos2.x) - Math.min(pos1.x, pos2.x) + 1;
+                    var height = Math.max(pos1.y, pos2.y) - Math.min(pos1.y, pos2.y) + 1;
+                    var area = length * height;
+
+                    maxArea = Math.max(maxArea, area);
+                }
+            }
+            return maxArea;
+        }
+
+        private static List<Position> readPositions(String input) {
+            return input.lines()
+                    .map(l -> {
+                                var split = l.split(",");
+                                return new Position(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+                            }
+                    ).toList();
+        }
+
+        public static long partTwo(String input) {
+            var positions = readPositions(input);
+            int maxX = 0;
+            int maxY = 0;
+
+            for (Position position : positions) {
+                maxX = Math.max((int) position.x, maxX);
+                maxY = Math.max((int) position.y, maxY);
+            }
+
+            char[][] grid = new char[maxX][maxX];
+
+
+            return -1;
+        }
+    }
 }
