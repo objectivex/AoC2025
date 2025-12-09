@@ -38,13 +38,21 @@ public class Day09 {
         List<Position> positions = new ArrayList<>(readPositions(input));
         positions.add(positions.getFirst());
 
-        var maxX = positions.stream().mapToInt(Position::x).max().orElseThrow();
-        var maxY = positions.stream().mapToInt(Position::x).max().orElseThrow();
+        List<Position> border = new ArrayList<>();
 
-        Map<Integer, List<Integer>> border = new HashMap<>();
+        for (int i = 0; i < positions.size() - 1; i++) {
+            var pos1 = positions.get(i);
+            var pos2 = positions.get(i + 1);
 
-        for (int i = 0; i < maxY; i++) {
-            fillLine(positions, i, border);
+            if (pos1.x == pos2.x) {
+                for (int y = Math.min(pos1.y, pos2.y); y <= Math.max(pos1.y, pos2.y); y++) {
+                    border.add(new Position(pos1.x, y));
+                }
+            } else if (pos1.y == pos2.y) {
+                for (int x = Math.min(pos1.x, pos2.x); x <= Math.max(pos1.x, pos2.x); x++) {
+                    border.add(new Position(x, pos1.y));
+                }
+            }
         }
 
         long maxArea = 0;
@@ -56,34 +64,30 @@ public class Day09 {
                 var length = Math.max(pos1.x, pos2.x) - Math.min(pos1.x, pos2.x) + 1;
                 var height = Math.max(pos1.y, pos2.y) - Math.min(pos1.y, pos2.y) + 1;
                 var area = (long) length * (long) height;
-                if (area > maxArea) {
-                    if (isIncluded(pos1, pos2, border, positions)) {
-                        maxArea = area;
-                    }
+
+                if (area > maxArea && enclosed(pos1, pos2, border)) {
+                    maxArea = area;
                 }
             }
         }
-
-//        var grid = AoCUtils.initGrid(maxY + 1, maxX + 1);
-//        for (int y = 0; y < maxY; y++) {
-//            var intersections = border.getOrDefault(y, Collections.emptyList());
-//            for (int i = 0; i < intersections.size() - 1; i++) {
-//                var start = intersections.get(i);
-//                var end = intersections.get(i + 1);
-//                for (Integer integer = start; integer <= end; integer++) {
-//                    grid[y][integer] = 'X';
-//
-//                }
-//            }
-//        }
-//        for (Position position : border.keySet()) {
-//            grid[position.y][position.x] = 'X';
-//        }
-//        AoCUtils.print(grid);
-
         return maxArea;
+    }
 
-//        return -1;
+    private static boolean enclosed(Position pos1, Position pos2, List<Position> border) {
+        int minX = Math.min(pos1.x, pos2.x);
+        int maxX = Math.max(pos1.x, pos2.x);
+        int minY = Math.min(pos1.y, pos2.y);
+        int maxY = Math.max(pos1.y, pos2.y);
+
+        for (Position position : border) {
+            if (position.x > minX && position.x < maxX && position.y > minY && position.y < maxY) {
+                return false;
+            }
+        }
+
+        return true;
+
+
     }
 
     private static void fillLine(List<Position> positions, int y, Map<Integer, List<Integer>> border) {
@@ -148,8 +152,8 @@ public class Day09 {
                 for (int i = 0; i < intersections.size() - 1; i++) {
                     var start = intersections.get(i);
                     var end = intersections.get(i + 1);
-                    if (x >=start && x<=end) {
-                        found=true;
+                    if (x >= start && x <= end) {
+                        found = true;
                         break;
                     }
                 }
