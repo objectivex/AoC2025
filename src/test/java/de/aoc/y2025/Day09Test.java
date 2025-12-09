@@ -18,13 +18,15 @@ public class Day09Test extends AoCTest {
 
     @Test
     public void testPartOne() {
-        assertEquals(50, Day08.Day09.partOne(input));
-        assertEquals(4763509452L, Day08.Day09.partOne(readInput()));
+        assertEquals(50, Day09.partOne(input));
+        assertEquals(4763509452L, Day09.partOne(readInput()));
     }
 
     @Test
     public void testPartTwo() {
-        assertEquals(25272, Day08.Day09.partTwo(input));
-//        assertEquals(7264308110L, Day09.partTwo(readInput()));
+        assertEquals(24, Day09.partTwo(input));
+        assertEquals(-1, Day09.partTwo(readInput()));
+
+        // < 4605538168
     }
 }

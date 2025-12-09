@@ -33,4 +33,14 @@ public class AoCUtils {
 
         return grid;
     }
+
+    public static char[][] initGrid(int maxY, int maxX) {
+        char[][] grid = new char[maxY][maxX];
+        for (int y = 0; y < maxY; y++) {
+            for (int x = 0; x < maxX; x++) {
+                grid[y][x] = '.';
+            }
+        }
+        return grid;
+    }
 }
