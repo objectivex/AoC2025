@@ -1,6 +1,5 @@
 package de.aoc.y2025;
 
-import java.sql.Array;
 import java.util.*;
 
 public class Day09 {
@@ -42,32 +41,10 @@ public class Day09 {
         var maxX = positions.stream().mapToInt(Position::x).max().orElseThrow();
         var maxY = positions.stream().mapToInt(Position::x).max().orElseThrow();
 
-        Map<Position, Object> border = new HashMap<>();
+        Map<Integer, List<Integer>> border = new HashMap<>();
 
-        System.out.println("filling");
-        for (int y = 0; y <= maxY; y++) {
-            List<Integer> intersections = new ArrayList<>();
-
-            for (int i = 0; i < positions.size() - 1; i++) {
-                Position pos1 = positions.get(i);
-                Position pos2 = positions.get(i + 1);
-                if (pos1.y == pos2.y) {
-                    continue;
-                }
-
-                intersections.addAll(intersect(pos1, pos2, y));
-            }
-
-            Collections.sort(intersections);
-
-            for (int i = 0; i < intersections.size() - 1; i++) {
-                var start = intersections.get(i);
-                var end = intersections.get(i + 1);
-                for (Integer integer = start; integer <= end; integer++) {
-                    border.put(new Position(integer, y), true);
-
-                }
-            }
+        for (int i = 0; i < maxY; i++) {
+            fillLine(positions, i, border);
         }
 
         long maxArea = 0;
@@ -80,35 +57,112 @@ public class Day09 {
                 var height = Math.max(pos1.y, pos2.y) - Math.min(pos1.y, pos2.y) + 1;
                 var area = (long) length * (long) height;
                 if (area > maxArea) {
-                    if (isIncluded(pos1, pos2, border)) {
+                    if (isIncluded(pos1, pos2, border, positions)) {
                         maxArea = area;
                     }
                 }
             }
         }
-        return maxArea;
 
 //        var grid = AoCUtils.initGrid(maxY + 1, maxX + 1);
+//        for (int y = 0; y < maxY; y++) {
+//            var intersections = border.getOrDefault(y, Collections.emptyList());
+//            for (int i = 0; i < intersections.size() - 1; i++) {
+//                var start = intersections.get(i);
+//                var end = intersections.get(i + 1);
+//                for (Integer integer = start; integer <= end; integer++) {
+//                    grid[y][integer] = 'X';
+//
+//                }
+//            }
+//        }
 //        for (Position position : border.keySet()) {
 //            grid[position.y][position.x] = 'X';
 //        }
 //        AoCUtils.print(grid);
 
+        return maxArea;
 
 //        return -1;
     }
 
-    private static boolean isIncluded(Position pos1, Position pos2, Map<Position, Object> border) {
+    private static void fillLine(List<Position> positions, int y, Map<Integer, List<Integer>> border) {
+//        System.out.println("filling " + y);
+        List<Integer> intersections = new ArrayList<>();
+
+        for (int i = 0; i < positions.size() - 1; i++) {
+            Position pos1 = positions.get(i);
+            Position pos2 = positions.get(i + 1);
+            if (pos1.y == pos2.y) {
+                continue;
+            }
+
+            intersections.addAll(intersect(pos1, pos2, y));
+        }
+
+        Collections.sort(intersections);
+        border.put(y, intersections);
+
+//        for (int i = 0; i < intersections.size() - 1; i++) {
+//            var start = intersections.get(i);
+//            var end = intersections.get(i + 1);
+//            for (Integer integer = start; integer <= end; integer++) {
+//                border.put(new Position(integer, y), true);
+//
+//            }
+//        }
+    }
+
+    private static boolean isIncluded(Position pos1, Position pos2, Map<Integer, List<Integer>> border, List<Position> positions) {
         var minX = Math.min(pos1.x, pos2.x);
         var minY = Math.min(pos1.y, pos2.y);
         var maxX = Math.max(pos1.x, pos2.x);
         var maxY = Math.max(pos1.y, pos2.y);
+//
+//        if (!filledLines.contains(minY)) {
+//            fillLine(positions, minY, border);
+//            filledLines.add(minY);
+//        }
+//        if (!filledLines.contains(maxY)) {
+//            fillLine(positions, maxY, border);
+//            filledLines.add(maxY);
+//        }
+
+//        if (!border.containsKey(new Position(minX, minY))) {
+//            return false;
+//        }
+//        if (!border.containsKey(new Position(minX, maxY))) {
+//            return false;
+//        }
+//        if (!border.containsKey(new Position(maxX, minY))) {
+//            return false;
+//        }
+//        if (!border.containsKey(new Position(maxX, maxY))) {
+//            return false;
+//        }
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
-                if (!border.containsKey(new Position(x, y))) {
+                var intersections = border.getOrDefault(y, Collections.emptyList());
+                boolean found = false;
+                for (int i = 0; i < intersections.size() - 1; i++) {
+                    var start = intersections.get(i);
+                    var end = intersections.get(i + 1);
+                    if (x >=start && x<=end) {
+                        found=true;
+                        break;
+                    }
+                }
+                if (!found) {
                     return false;
                 }
+//                if (!filledLines.contains(y)) {
+//                    fillLine(positions, y, border);
+//                    filledLines.add(y);
+//                }
+//                if (!border.containsKey(new Position(x, y))) {
+//                    return false;
+//                }
             }
 
         }
