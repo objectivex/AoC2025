@@ -41,7 +41,7 @@ public class Day11Test extends AoCTest {
                 ggg: out
                 hhh: out
                 """));
-//        assertEquals(1516897893, Day11.partTwo(readInput()));
+        assertEquals(1516897893, Day11.partTwo(readInput()));
 
         // < 4605538168
     }

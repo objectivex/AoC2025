@@ -8,22 +8,23 @@ public class Day11 {
         List<Node> nodes = new ArrayList<>();
     }
 
-    static List<List<String>> possiblePath = new ArrayList<>();
+    //    static List<List<String>> possiblePath = new ArrayList<>();
+    static int foundPath = 0;
 
     public static long partOne(String input) {
         var nodes = parseNodes(input);
-        possiblePath.clear();
+        foundPath = 0;
         List<String> path = new ArrayList<>();
         path.add("you");
         findPath(nodes, "you", "out", new HashSet<>(), path);
-        return possiblePath.size();
+        return foundPath;
 
     }
 
 
     private static void findPath(Map<String, List<String>> nodes, String currentNode, String end, Set<String> visited, List<String> path) {
         if (currentNode.equals(end)) {
-            possiblePath.add(path);
+            foundPath++;
             return;
         }
 
@@ -59,7 +60,37 @@ public class Day11 {
         return nodes;
     }
 
+    private static void findPath2(Map<String, List<String>> nodes, String currentNode, String end, Set<String> visited, List<String> path) {
+        if (currentNode.equals(end)) {
+            if (path.contains("fft") && path.contains("dac")) {
+                foundPath++;
+            }
+            return;
+        }
+
+        visited.add(currentNode);
+
+        var children = nodes.getOrDefault(currentNode, Collections.emptyList());
+
+        for (String child : children) {
+            if (visited.contains(child)) {
+                continue;
+            }
+
+            path.add(child);
+            findPath2(nodes, child, end, visited, path);
+            path.remove(child);
+        }
+
+        visited.remove(currentNode);
+    }
+
     public static long partTwo(String input) {
-        return 0;
+        var nodes = parseNodes(input);
+        foundPath = 0;
+        List<String> path = new ArrayList<>();
+        path.add("svr");
+        findPath2(nodes, "svr", "out", new HashSet<>(), path);
+        return foundPath;
     }
 }
