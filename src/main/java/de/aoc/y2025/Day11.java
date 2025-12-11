@@ -10,6 +10,7 @@ public class Day11 {
 
     //    static List<List<String>> possiblePath = new ArrayList<>();
     static int foundPath = 0;
+    static Map<String, Long> cache;
 
     public static long partOne(String input) {
         var nodes = parseNodes(input);
@@ -60,12 +61,14 @@ public class Day11 {
         return nodes;
     }
 
-    private static void findPath2(Map<String, List<String>> nodes, String currentNode, String end, Set<String> visited, List<String> path) {
-        if (currentNode.equals(end)) {
+    private static long findPath2(Map<String, List<String>> nodes, String currentNode, String end, Set<String> visited, List<String> path) {
+        long foundPaths = 0;
+
+        if (currentNode.equals("out")) {
             if (path.contains("fft") && path.contains("dac")) {
-                foundPath++;
+                return 1;
             }
-            return;
+            return 0;
         }
 
         visited.add(currentNode);
@@ -73,24 +76,49 @@ public class Day11 {
         var children = nodes.getOrDefault(currentNode, Collections.emptyList());
 
         for (String child : children) {
-            if (visited.contains(child)) {
+            if (path.contains(child)) {
                 continue;
             }
 
             path.add(child);
-            findPath2(nodes, child, end, visited, path);
+            String key = generateKey(path);
+
+            if (cache.containsKey(key)) {
+                foundPaths += cache.get(key);
+            } else {
+                long subPaths = findPath2(nodes, child, end, new HashSet<>(visited), path);
+                cache.put(key, subPaths);
+                foundPaths += subPaths;
+            }
             path.remove(child);
         }
 
         visited.remove(currentNode);
+
+        return foundPaths;
+    }
+
+    private static String generateKey(List<String> path) {
+        String key = path.getLast();
+        if (path.contains("fft")) {
+            key += "fft";
+        }
+        if (path.contains("dac")) {
+            key += "dac";
+        }
+
+
+        return key;
     }
 
     public static long partTwo(String input) {
         var nodes = parseNodes(input);
         foundPath = 0;
+        cache = new HashMap<>();
+
         List<String> path = new ArrayList<>();
         path.add("svr");
-        findPath2(nodes, "svr", "out", new HashSet<>(), path);
-        return foundPath;
+        var x = findPath2(nodes, "svr", "out", new HashSet<>(), path);
+        return x;
     }
 }
