@@ -3,46 +3,29 @@ package de.aoc.y2025;
 import java.util.*;
 
 public class Day11 {
-    static class Node {
-        String name;
-        List<Node> nodes = new ArrayList<>();
+
+    @FunctionalInterface
+    interface PathAcceptor {
+        boolean accept(List<String> path);
     }
 
-    //    static List<List<String>> possiblePath = new ArrayList<>();
-    static int foundPath = 0;
     static Map<String, Long> cache;
 
     public static long partOne(String input) {
         var nodes = parseNodes(input);
-        foundPath = 0;
         List<String> path = new ArrayList<>();
         path.add("you");
-        findPath(nodes, "you", "out", new HashSet<>(), path);
-        return foundPath;
-
+        cache = new HashMap<>();
+        return findPaths(nodes, "you", "out", path, p -> true);
     }
 
+    public static long partTwo(String input) {
+        var nodes = parseNodes(input);
+        cache = new HashMap<>();
 
-    private static void findPath(Map<String, List<String>> nodes, String currentNode, String end, Set<String> visited, List<String> path) {
-        if (currentNode.equals(end)) {
-            foundPath++;
-            return;
-        }
-
-        visited.add(currentNode);
-
-        var children = nodes.get(currentNode);
-        for (String child : children) {
-            if (visited.contains(child)) {
-                continue;
-            }
-
-            path.add(child);
-            findPath(nodes, child, end, visited, path);
-            path.remove(child);
-        }
-
-        visited.remove(currentNode);
+        List<String> path = new ArrayList<>();
+        path.add("svr");
+        return findPaths(nodes, "svr", "out", path, path1 -> (path1.contains("fft") && path1.contains("dac")));
     }
 
     private static Map<String, List<String>> parseNodes(String input) {
@@ -61,19 +44,14 @@ public class Day11 {
         return nodes;
     }
 
-    private static long findPath2(Map<String, List<String>> nodes, String currentNode, String end, Set<String> visited, List<String> path) {
+    private static long findPaths(Map<String, List<String>> nodes, String currentNode, String end, List<String> path, PathAcceptor acceptor) {
         long foundPaths = 0;
 
-        if (currentNode.equals("out")) {
-            if (path.contains("fft") && path.contains("dac")) {
-                return 1;
-            }
-            return 0;
+        if (currentNode.equals(end)) {
+            return acceptor.accept(path) ? 1 : 0;
         }
 
-        visited.add(currentNode);
-
-        var children = nodes.getOrDefault(currentNode, Collections.emptyList());
+        var children = nodes.get(currentNode);
 
         for (String child : children) {
             if (path.contains(child)) {
@@ -86,14 +64,12 @@ public class Day11 {
             if (cache.containsKey(key)) {
                 foundPaths += cache.get(key);
             } else {
-                long subPaths = findPath2(nodes, child, end, new HashSet<>(visited), path);
+                long subPaths = findPaths(nodes, child, end, path, acceptor);
                 cache.put(key, subPaths);
                 foundPaths += subPaths;
             }
             path.remove(child);
         }
-
-        visited.remove(currentNode);
 
         return foundPaths;
     }
@@ -107,18 +83,6 @@ public class Day11 {
             key += "dac";
         }
 
-
         return key;
-    }
-
-    public static long partTwo(String input) {
-        var nodes = parseNodes(input);
-        foundPath = 0;
-        cache = new HashMap<>();
-
-        List<String> path = new ArrayList<>();
-        path.add("svr");
-        var x = findPath2(nodes, "svr", "out", new HashSet<>(), path);
-        return x;
     }
 }
