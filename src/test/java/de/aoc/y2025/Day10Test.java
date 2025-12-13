@@ -26,7 +26,7 @@ public class Day10Test extends AoCTest {
         assertEquals(12, Day10.partTwo("[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}"));
         assertEquals(11, Day10.partTwo("[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}"));
         assertEquals(33, Day10.partTwo(input));
+        assertEquals(21021, Day10.partTwo(readInput()));
 
-        // < 4605538168
     }
 }
