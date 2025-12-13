@@ -5,144 +5,79 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Day10 {
-    static class Line {
-        Integer desiredState;
-        Integer currentState;
-
-        List<Integer> bitmap = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", Line.class.getSimpleName() + "[", "]")
-                    .add("desiredState=" + desiredState)
-                    .add("currentState=" + currentState)
-                    .add("bitmap=" + bitmap)
-                    .toString();
-        }
-    }
-
     public static long partOne(String input) {
-        var lines = input.split("\n");
-//        System.out.println(line);
-        int sum = 0;
-//        String line = lines[1];
-
-        for (String line : lines) {
-//        {
-            System.out.println(line);
-            var first = line.substring(line.indexOf("[") + 1, line.indexOf("]"));
-
-            Pattern p = Pattern.compile("(\\([^)]+\\))");
-            Matcher m = p.matcher(line);
-
-            var l = new Line();
-            l.desiredState = parseDesireg(first);
-
-            while (m.find()) {
-                int bitmap = parseBitmap(m.group());
-                l.bitmap.add(bitmap);
-            }
-
-//            System.out.println(l);
-
-            var x = calculate(l);
-
-//            System.out.println();
-            sum += x;
-        }
-        return sum;
-    }
-
-    private static int calculate(Line l) {
-        int presses = 0;
-
-        int minPressed = Integer.MAX_VALUE;
-        for (Integer i : l.bitmap) {
-            Set<Integer> states = new HashSet<>();
-            var state = 0;
-            state ^= i;
-            //     presses++;
-
-            if (state == l.desiredState) {
-                return 1;
-            }
-
-            states.add(state);
-            var x = calculate(l, state, states, i, 1, Integer.MAX_VALUE);
-            minPressed = Math.min(minPressed, x);
-
-        }
-
-        return minPressed;
-    }
-
-    private static int calculate(Line l, int state, Set<Integer> s, Integer lastPressed, int presses, int minPressed) {
-        if (presses >= minPressed) {
-            return minPressed;
-        }
-        minPressed = Integer.MAX_VALUE;
-
-        for (Integer i : l.bitmap) {
-            var states = new HashSet<>(s);
-            if (i.equals(lastPressed)) {
-                continue;
-            }
-
-            var currentState = state;
-            currentState ^= i;
-
-
-            if (currentState == l.desiredState) {
-                return presses + 1;
-            }
-
-            if (states.contains(currentState)) {
-                return Integer.MAX_VALUE;
-            }
-            states.add(currentState);
-
-            var y = calculate(l, currentState, states, i, presses + 1, minPressed);
-            minPressed = Math.min(minPressed, y);
-            System.out.println(y);
-        }
-        return minPressed;
-    }
-
-//    private static int calculate(Line l, int maxValue) {
-//        int presses = 0;
-//        for (Integer i : l.bitmap) {
-//
-//        }
-//    }
-
-    private static int parseBitmap(String group) {
-        var bits = Arrays.stream(group.substring(1, group.length() - 1).split(","))
-                .map(String::trim)
-                .map(Integer::parseInt)
+        var lines = input.lines()
                 .toList();
 
-//        System.out.print(bits);
-//        System.out.print(" -> ");
+        long sum = 0;
+        for (String line : lines) {
 
-        int b = 0;
-        for (Integer bit : bits) {
-            if (bit == 0) {
-                b = b | 1;
-            } else {
-                b = b | 2 << (bit - 1);
-            }
+
+//            var line = lines.getFirst();
+            var desired = parseDesired(line.substring(line.indexOf("[") + 1, line.indexOf("]")));
+
+            List<Integer> toggles = parseToggles(line);
+            sum+= calculateMin(toggles, 0, desired);
         }
-
-//        System.out.println(b + "(" + Integer.toBinaryString(b) + ")");
-
-        return b;
+        return sum;
+//        int sum = 0;
+//        for (int i = 0; i < toggles.size(); i++) {
+//            var toggle = toggles.get(i);
+//            sum = sum ^ toggle;
+//            if (sum == desired) {
+//                return i+1;
+//            }
+//        }
+//
+//        return -1;
     }
 
-    private static int parseDesireg(String first) {
-        var x = first.replace('.', '0').replace('#', '1');
-        x = new StringBuilder(x).reverse().toString();
-        var y = Integer.parseInt(x, 2);
-        return y;
+    private static long calculateMin(List<Integer> toggles, int current, int desired) {
+        long min = 100000000000L;
+
+        if (current == desired) {
+            return 0;
+        }
+
+        for (int i = 0; i < toggles.size(); i++) {
+            long m1 = 2L + calculateMin(toggles.subList(i + 1, toggles.size()), current ^ toggles.get(i), desired);
+            long m2 = 1L+calculateMin(toggles.subList(i + 1, toggles.size()), current ^ toggles.get(i), desired);
+            min = Math.min(min, Math.min(m1,m2));
+        }
+
+
+        return min;
+    }
+
+    private static List<Integer> parseToggles(String line) {
+        var pattern = Pattern.compile("\\(([^)]+)\\)");
+        Matcher m = pattern.matcher(line);
+        List<Integer> list = new ArrayList<>();
+        while (m.find()) {
+            var s = Arrays.stream(m.group(1).split(","))
+                    .map(String::trim)
+                    .map(Integer::parseInt)
+                    .toList();
+            int number = 0;
+            for (Integer i : s) {
+                if (i == 0) {
+                    number = number | 1;
+                } else {
+                    number = number | 2 << (i - 1);
+                }
+            }
+
+            list.add(number);
+
+        }
+
+
+        return list;
+    }
+
+    private static int parseDesired(String input) {
+        var s = new StringBuffer(input.replace('.', '0').replace('#', '1')).reverse().toString();
+        return Integer.parseInt(s, 2);
     }
 
     public static long partTwo(String input) {
