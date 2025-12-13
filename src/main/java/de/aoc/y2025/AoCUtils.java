@@ -43,4 +43,19 @@ public class AoCUtils {
         }
         return grid;
     }
+
+    public static char[][] rotateRight(char[][] g) {
+        int maxY = g[0].length;
+        int maxX = g.length;
+
+        char[][] grid = new char[maxY][maxX];
+
+
+        for (int y = 0; y < maxY; y++) {
+            for (int x = 0; x < maxX; x++) {
+                grid[x][maxX - 1 - y] = g[y][x];
+            }
+        }
+        return grid;
+    }
 }
